@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Project Proposal</title>
+</head>
+<body>
+    <h1>Visualizing General Relativity</h1>   
+    <h2>Summary:</h2>
+    <p>
+        Our project will model the black hole Sagittarius A*, with a primary focus on how light rays are realistically 
+        affected by the gravitational pull of a black hole. Our ray tracing model will incorporate gravity on each ray 
+        to model the black hole's Schwarzschild radius, as well as demonstrating how light reflects off of various 
+        objects, such as asteroids and spacecraft, as they approach the black hole. Overall, our project will aid in 
+        visualizing potential interactions in space that traditional ray tracing algorithms would struggle to accurately 
+        represent.
+    </p> 
+    <h2>Teammates:</h2>
+    <ul>
+        <li>Ryan Lee</li>
+        <li>Phone Myat Min</li>
+        <li>Jake Patrick Pastoria</li>
+        <li>Ryan Trinh</li>
+    </ul>
+    <h2>Problem Description</h2>
+    <p>
+        The issue our project is trying to solve is that traditional ray tracing models assume that rays are unaffected by 
+        gravity. This assumption is valid in the majority of situations, but as the scale of the environment grows, as in 
+        the case with astronomical representations, this becomes further and further from the truth. Light rays that should 
+        be curving due to celestial bodies instead just continue moving in a straight line, culminating in a distorted image.
+    </p>
+    <p>
+        Solving this problem is important, as without it, physically accurate modeling of space wouldn't be possible. 
+        The human perception of distant celestial objects is solely based on these reflected light rays, so to understand 
+        how these objects truly look physically, a precise understanding of how light would travel through space is crucial.
+    </p>
+    <p>
+        However, this project isn't without many challenges. For one, the calculations required for each ray will be much 
+        more complicated compared to the ray tracing algorithms we've previously discussed. Not only does this mean there 
+        will be more complicated models involved, but the computational load to simulate the model will be much higher. To 
+        solve this type of issue, it'll be necessary to come up with more optimization strategies through tactics such as 
+        approximating ray paths rather than computing each one directly. 
+    </p>
+    <h2>Goals and Deliverables</h2>
+    <h3>What do we plan to deliver?</h3>
+    <p>
+        Our main deliverable is a render of ambient cosmic background light bending around the Schwarzschild radius of 
+        Sagittarius A*, as shown in the image below.
+    </p>
+    <img src="img/Sagittarius_A.png" alt="Sagittarius A*">
+    <p>
+        To produce this final render, we must approach the problem from two fronts: understanding the underlying physics 
+        of general relativity and implementing computational methods to apply ray tracing for accurate modeling. The main 
+        physical phenomena that we plan to emulate in our project are gravitational lensing, accretion disks, and the 
+        Schwarzschild radius of black holes. These phenomena act as the core deliverables that will result in ray-tracing 
+        that follows Einstein's theory of general relativity. 
+    </p>
+    <h3>What do we hope to deliver?</h3>
+    <p>
+        Once we have laid down the foundation of modelling Sagittarius A* through producing the phenomena mentioned above, 
+        we hope to also include a depiction of red shifting and time dilation. We'd demonstrate these effects by having some 
+        type of object (spacecraft or asteroid) approach the black hole, making renders at decreasing distances. The object 
+        should begin to redshift, and eventually, no light would escape, and thus the object would disappear. 
+    </p>
+    <h2>Schedule</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Starting Date</th>
+                <th>Task</th>
+                <th>Deadline</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>7/28</td>
+                <td>Milestone Deliverables</td>
+                <td>8/3</td>
+            </tr>
+            <tr>
+                <td>8/4</td>
+                <td>Final Deliverables</td>
+                <td>8/10</td>
+            </tr>
+                <tr>
+                <td>8/11</td>
+                <td>Final Presentation / Practicing</td>
+                <td>8/12</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Resources</h2>
+    <ul>
+        <li>
+            <a href="https://sites.google.com/berkeley.edu/cs184-final-project-final-repo/home">Sample Project: Gargantua: Ray-Tracing Schwarzchild Black Holes</a> 
+            by Aseem Doriwala, Sarthak Kamat, Vincent Lim, Jeremy Ferguson
+        </li>
+    </ul>
+</body>
+
+</html>
