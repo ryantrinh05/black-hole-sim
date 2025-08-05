@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Milestone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+        <h1>Into the Abyss: A Ray-Traced Journey to Sagittarius A*</h1>
+        <h3>Milestone Report</h3>
+        <div class="links">
+            <a href="https://docs.google.com/presentation/d/190rOEbURfF9y20bRWnmXRpA8zfy-5XB__fUt12MuU1M/edit?usp=sharing">Slides</a>
+            <a href="https://www.youtube.com/watch?v=HFmJNPyUBDc&ab_channel=JakePastoria">Video</a>
+        </div>
+        
+</header> 
+<main class="milestone">
+    <h2>Progress Summary</h2>
+        <p class="milestone">
+            To begin with, the majority of our progress this week has been through researching the different dependencies 
+            we need, as well as the different physics equations. This includes looking into how we want to represent the
+            accretion disk, which we determined will be with a textured disk, as well as looking more into 
+            methods like 4th-order Runge-Kutta. Although challenging, we believe it will make 
+            the rest of the project much easier. Additionally, we've managed to set up our OpenGL project and connect useful 
+            libraries like GLFW, GLAD, and GLM. With these tools, the current functionality of our project allows us to open a window 
+            and draw a quad that fully encompasses the screen. This enables us to use the fragment shader we have for 
+            ray marching. Finally, through the use of basic ray tracing techniques and the GLM framework, we were also able to draw 
+            rays onto the screen and perform a simple ray integrations.
+        </p>
+    <h2>Preliminary Results</h2>
+        <div align="middle">
+            <table style="width:100%">
+                <tr align="center">
+                    <td>
+                        <img src="img/basic_rays.png" alt="2 Rays" width="150">
+                        <figcaption>Simple Curved Rays</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/fragment_shader.png" alt="Fragment Shader" width="150">
+                        <figcaption>Raymarched Shader</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/raymarched_bh.png" alt="Ray-Marched Blackhole" width="150">
+                        <figcaption>Raymarched Black hole</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p> 
+            Our preliminary results includes a simple ray integration display, which the rays curving inwards towards the center of the
+            screen. This involved using both the inverse square law and euler's method. While it may not be completely accurate to a blackhole, 
+            it allowed us to experiment with ray tracing setup. Our other two results involve our fragment shader and ray marching. Using these
+            techniques, we were able to generate images such as the center one which tracked the rays and depicted a color based on how far they travelled.
+            The other image represents a ray-marched black hole, similar to what our final project would contain.
+        </p>
+
+    <h2>Reflections</h2>
+        <p>
+            Overall, we are pretty satisfied with the progress we've made so far relative to our plan. While we were massively
+            over optimistic with how much we could get done, we also done a lot of the foundational work, such as research and 
+            set up, that our future features would be built on top of. However, it does mean that in the upcoming week we will have to catch
+            up on the previous tasks which we planned for last week. 
+        </p>
+    <h2>Updated Workplan</h2>
+        <p>
+            To be more realistic, from 8/4 - 8/7, we will be focusing solely on implementing the accretion disk, implementing
+            the 4-th order Runge-Kutta method, and working on our final slides. From 8/7 - 8/11, we will finalize our ray marching
+            algorithm, render simulations, and if possible, add interactivity and moving objects. After that, everything remains the same.
+        </p>
+
+    <nav >
+        <a href="index.html" style="text-decoration: none;">← Proposal</a>
+        <a href="final.html" style="text-decoration: none;">Final →</a>
+    </nav>
+</main>
+
+</body>
+</html>
