@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Final</title>
+    <link rel="stylesheet" href="style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+<header>
+        <h1>Into the Abyss: A Ray-Traced Journey to Sagittarius A*</h1>
+        <h3>Final Report</h3>
+        <div class="links">
+            <p>Slides: <a href="https://docs.google.com/presentation/d/1Dm-W6UCv4PRnx7UbCykMAAWYuIG0SvxMklSZChfLqD4/edit?usp=sharing">docs.google.com/presentation/d/1Dm-W6UCv4PRnx7UbCykMAAWYuIG0SvxMklSZChfLqD4/edit?usp=sharing</a></p>
+            <p>Video: <a href="https://www.youtube.com/watch?v=5z_MPQjW7bQ">https://www.youtube.com/watch?v=5z_MPQjW7bQ</a></p>
+            <p>Website: <a href="https://ryantrinh05.github.io/black-hole-sim/final.html">ryantrinh05.github.io/black-hole-sim/final.html</a></p>
+        </div>
+</header> 
+<main class="final">
+    <img src="img/Final_Gif.gif" alt="GIF of Final Result" width="300">
+
+    <h2>Abstract</h2>
+        <p>
+            This project models the black hole Sagittarius A*, with a primary focus on how light rays are 
+            realistically affected by the gravitational pull of a black hole, a key aspect of Einstein's theory 
+            of general relativity. Through the use of raymarching, our model incorporates gravity on each ray 
+            to model the black hole's Schwarzschild radius, as well as demonstrating how light from the 
+            surrounding space gets warped and distorted as photons approach the black hole. Overall, our project 
+            helps visualize interactions surrounding black holes that traditional ray tracing algorithms would 
+            struggle to accurately represent.
+        </p>
+    <h2>Technical Approach</h2>
+        <h3>Physical Equations</h3>
+        <p>
+            Coming to our technical approach, we explored ways to implement the effect of gravity on light. 
+            Initially, we considered modeling light trajectories using geodesic equations from general relativity. This would require us 
+            solving the geodesic differential equation: 
+  
+            $$\frac{d^2 x^\mu}{d \lambda^2} + \Gamma^\mu_{\alpha \beta} \frac{d x^\alpha}{d \lambda} \frac{d x^\beta}{d \lambda} = 0$$
+
+            This approach was very computationally intensive and complex to implement within our project deadline. 
+            In adjusting to this problem, we decided that instead of gravity from a relativistic point of 
+            view and calculating geodesic paths, we can take a Newtonian approach that applied a gravitational 
+            force to the light rays.
+        </p>
+        <p> 
+            First, we considered the Paczyński-Wiita pseudo-Newtonian potential according to the source “Thick 
+            accretion disks and supercritical luminosities” by Paczyński, B., & Wiita, P. J which closely imitates 
+            general relativity by diverging the Schwarzschild radius. However, there were still challenges like numerical
+            integration stability issues when approaching the Schwarzschild radius (rs). We also learned the difficulty 
+            of fitting it into our existing GPU-based integration loop. Therefore, we were not able to fully 
+            integrate it into our simulation pipeline.
+        </p>
+        <p>
+            Finally, we decided to instead use a much simpler Newtonian force law (1/r^2) where r is the distance 
+            between the black hole and the light (photon). This Newtonian force law is almost identical to the 
+            Paczyński-Wiita pseudo-Newtonian potential. According to the source Spacetime and Geometry by Carroll, 
+            it comes from the fact that F(r) = GM/r^2. Therefore, at each timestep, we measured the 
+            ray's distance from the black hole center. And, we compute a gravitational acceleration vector toward 
+            the black hole, adjust the ray's direction by adding this acceleration and finally, renormalizing the 
+            direction and position. This allowed us to bend the light paths in a physically intuitive way while we 
+            were able to keep the math and performance manageable. We learned that the Newtonian (1/r^2) approach
+            is simple, computationally light and stable, but it allows light to get unrealistically close to the 
+            black hole without sufficient bending.
+        </p>
+        <h3>General Ray Marching</h3>
+        <p>
+            Our project uses OpenGL with raymarching and a complex fragment shader to render all the visuals seen. 
+            We start by creating a quad that consumes the entire window, and then we use the fragment shader to 
+            cast rays out from the camera into the scene. 
+        </p>
+        <p>
+            This image shows the UV coordinates of each pixel on the screen and represents the angles that 
+            the rays will be sent out:
+        </p>
+        <figure>
+            <img src="img/fragment_shader.png" alt="UV Coordinate Shader" width="200">
+            <figcaption>UV Coordinate Shader</figcaption>
+        </figure>
+        
+        
+        <p>
+            It is important to note that our model uses fixed-distance raymarching, meaning our rays travel at set 
+            intervals before checking their distance to objects in the scene, as seen in the image below. 
+        </p>
+        <figure>
+            <img src="img/raymarching.png" alt="Raymarching Diagram" width="200">
+            <figcaption>Image Credits: Adrian's Soapbox </figcaption>
+        </figure>
+        
+        <p>Once these rays are sent out, we can use a signed distance function for a sphere to represent the distance from 
+            the ray's current position to the black hole. To do this, we use the formula:
+        </p>
+        <pre><code>
+            float signedDistanceSphere(vec3 p, vec3 center, float r){
+            return length(p - center) - r;
+            }
+        </code>
+        </pre>
+        <p>
+            During the early development of our engine, this just returned a sphere that was shaded based on the distance that the ray 
+            travelled. Even just this simple technique yielded satisfying 3d renders:
+        </p>
+        <figure>
+            <img src="img/raymarched_bh.png" alt="Ray-Marched Black hole" width="200">
+            <figcaption>Raymarched Black hole</figcaption>
+        </figure>
+        
+        <p>
+            When the value of the signed distance function is <= 0.001 or some small number, we can confidently say that the ray has 
+            hit the event horizon of the black hole, and thus we will terminate the ray. In our fragment shader, 
+            this means the color of the pixel will return:
+        </p>
+        <pre>
+        <code>
+            color += vec3(0,0,0);  //color includes all previous radiance the ray has collected
+            return;
+        </code>
+        </pre>
+        <p>
+            This simple technique, coupled with our gravity system and background, slowly gained the 
+            ability to create more and more complicated renders.
+        </p>
+        <div align="middle">
+            <table style="width:100%">
+                <tr align="center">
+                    <td>
+                        <figure>
+                            <img src="img/progress1.png" alt="Noise Background w/ Black hole" width="200">
+                            <figcaption>Noise Background w/ Black hole</figcaption>
+                        </figure>
+                    </td>
+                    <td>
+                        <figure>
+                            <img src="img/progress2.png" alt="Black hole w/ Accretion Disk" width="200">
+                            <figcaption>Black hole w/ Accretion Disk</figcaption>
+                        </figure>
+                    </td>
+                    
+                </tr>
+                <tr align="center">
+                    <td colspan="2">
+                        <figure>
+                            <img src="img/progress3.png" alt="Black hole w/ Redshift" width="200">
+                            <figcaption>Black hole w/ Redshift</figcaption>
+                        </figure>
+                    </td>   
+                </tr>
+            </table>
+        </div>
+        <h3>Accretion Disk</h3>
+        <p>
+            The accretion disk is mainly modelled after an 'annulus' shape, which looks follows the 
+            shape of a flat torus:
+        </p>
+        <figure>
+            <img src="img/annulus.png" alt="Annulus" width="200">
+            <figcaption>Image Credits: BYJU'S </figcaption>
+        </figure>
+        <p>
+            In the case of a Schwarzschild black hole, the inner radius of the accretion disk is: $$3 R_s$$
+        where \( R_s \) is the Schwarzschild radius, also known as the event horizon. By placing the 2D annulus 
+        shape into the xz-plane, we test whether the ray intersects the annulus every time it crosses the xz-plane (i.e., when the \( y \) coordinate 
+        changes sign from positive to negative or vice versa). Checking for intersection with the disk is straightforward: we use 2D distance functions to 
+        determine if the ray's \( x \) and \( z \) coordinates lie between the inner and outer radii of the annulus.
+        </p>
+
+        <p>
+        Although this is not a physically accurate model of why the accretion disk glows, we visually replicate this phenomenon—including the photon 
+        ring—by assigning a color value to the disk and adding that to the total color of the ray. Additionally, we introduce circular noise along the xy-plane 
+        using the function:
+        $$\sin\left(\sqrt{x^2 + y^2}\right) = 0$$
+        </p>
+        <img>
+
+        <h3>Gravitational Lensing / HDR Background</h3>
+        <p>
+            To create the gravitational lensing effect, we tracked each ray sent out from the camera that missed 
+            both the black hole and the accretion disk. Once past, the rays' direction were used to determine at 
+            what point on a spherical area around the black hole does the ray eventually hit via the angle the ray 
+            made with the positive y-axis (theta Θ) and the angle made with the positive x-axis (phi 𝜙). 
+        </p>
+        <figure>
+            <img src="img\starmap_2020_4k_print.jpg" alt="Starmap" width="250">
+            <figcaption>Image Credits: NASA </figcaption>
+        </figure>
+        <p>    
+            This spherical area is represented through an HDR background from NASA, which is a starmap that depicts 
+            the starfield surrounding the real Sagittarius A*. This background is then given a uv coordinate system 
+            through the use of stb_image header and OpenGL's texture mapping, allowing us to fill in the empty space 
+            around the black hole. Using theta and phi, the uv coordinate on the HDR background is calculated and then 
+            used to sample the corresponding texel, which is sent to our fragment shader to be displayed. Since the 
+            gravitational forces already influenced the rays' directions, the resulting textures naturally mimic the 
+            warping effect, even revealing parts of the background that appear to come from behind the black hole.
+        </p>
+        <h3>Camera movement/control</h3>
+        <p>
+            To provide an interactive experience, we process user inputs and allow them to fly around 
+            in space, get closer to the black hole, and observe the space around them. Our program listens 
+            for inputs from the WASD, left shift, and space keys to manipulate the camera's xyz coordinates, 
+            as well as changes in the mouse position to change the direction the camera is facing. We 
+            modeled the camera similarly to how it was parametrized in lecture; we gave it an origin, 
+            up/forward vectors, and some other vectors for completeness, like manually calculating the 
+            right vector and saving that. With these parameters, we could translate rays from being 
+            defined in world space to being in terms of camera space. This allows for us to keep the 
+            same processing/logic for the rest of our program, but enables our display to change based 
+            on the camera's position and view directions.
+        </p>
+        <figure>
+            <img src="img/zoomed.png" alt="Zoomed in Black hole" width="200">
+            <figcaption>Zoomed in Black hole</figcaption>
+        </figure>
+
+    <h2>Results</h2>
+        <div align="middle">
+            <table style="width:100%">
+                <tr align="center">
+                    <td colspan="2">
+                        <iframe 
+                            src="https://www.youtube.com/embed/5z_MPQjW7bQ" 
+                            width="480" 
+                            height="360" 
+                            allow="autoplay" 
+                            allowfullscreen 
+                            frameborder="0">
+                        </iframe>
+                    </td>
+                </tr>
+                <tr align="center">
+                    <td>
+                        <figure>
+                            <img src="img/final.png" alt="Final Render" width="200">
+                            <figcaption>Final Render</figcaption>
+                        </figure>
+                    </td>
+                    <td>
+                        <figure>
+                            <img src="img/final_tilted.png" alt="Final Tilted" width="200">
+                            <figcaption>Tilted Render via Camera movement</figcaption>
+                        </figure>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+    <h2>Conclusions</h2>
+        <p>
+            Overall, the physics turned out to be a lot more complicated than we imagined, but we were still able to get great results using
+            simplier equations. Additionally, the ray marching plus fragment shader combination provided a lot more flexibility compared to ray tracing, 
+            yet still requires analytical definitions and signed distance functions. Despite the added challenges, it proved to be worthwhile as 
+            it made our simulation visually and accurately possible. Finally, one of our biggest lessons that we learned as that OpenGL projects, and C++ projects in general, are difficult to set up.
+            They require a lot more knowledge on frameworks and tools such as cmake than we expected, yet once we got them
+            set up, they provided a lot of the necessary structure to our project.
+        </p>
+    <h2>Contributions</h2>
+    <dl>
+        <dt><strong>Jake Pastoria</strong></dt>
+        <dd>Project Setup, Raymarching Algorithm, Newtonian Gravity, Accretion Disk, Photon Ring, Video</dd>
+
+        <dt><strong>Ryan Trinh</strong></dt>
+        <dd>HDR background, Gravitational Lensing, Website</dd>
+
+        <dt><strong>Phone Min</strong></dt>
+        <dd>Research on Paczyński-Wiita acceleration, 4th-Order RK Geodesic Equation</dd>
+
+        <dt><strong>Ryan Lee</strong></dt>
+        <dd>Mac Support and Set Up, Input Processing, Camera Transforms</dd>
+    </dl>
+
+    <nav >
+        <a href="milestone.html" style="text-decoration: none;">← Milestone</a>
+        <a href="index.html" style="text-decoration: none;">Proposal →</a>
+    </nav>
+</main>
+<footer>
+    <h2>References</h2>
+    <ul>
+        <li>
+            <a href="https://sites.google.com/berkeley.edu/cs184-final-project-final-repo/home">Sample Project: Gargantua: Ray-Tracing Schwarzschild Black Holes</a> 
+            by Aseem Doriwala, Sarthak Kamat, Vincent Lim, Jeremy Ferguson
+        </li>
+        <li>
+            <a href="https://groups.csail.mit.edu/graphics/classes/6.837/F97/projects/reports/team19.pdf">Relativistic Ray-Tracing: The Appearance of Rapidly Moving Objects</a> 
+            by Jeremy Daniel et al.
+        </li>
+        <li>
+            Paczyński, B., & Wiita, P. J. (1980). Thick accretion disks and supercritical luminosities. <em>Astronomy and Astrophysics, 88</em>, 23–31.
+        </li>
+        <li>
+            Carroll, S. (2004). <em>Spacetime and Geometry: An Introduction to General Relativity</em>. Addison Wesley.
+        </li>
+    </ul>
+
+    <h2>Image Credits</h2>
+    <ul>
+        <li>
+            <a href="https://adrianb.io/2016/10/01/raymarching.html">Adrian's Soapbox: Raymarching</a>
+        </li>
+        <li>
+            <a href="https://www.researchgate.net/figure/A-geodesic-on-the-surface-of-a-sphere_fig3_363501147">ResearchGate: Geodesic on the Surface of a Sphere</a>
+        </li>
+        <li>
+            <a href="https://en.wikipedia.org/wiki/Inverse-square_lawd">Wikipedia: Inverse-square Law</a>
+        </li>
+        <li>
+            <a href="https://byjus.com/annulus-formula/">BYJU'S: Annulus Formula</a>
+        </li>
+    </ul>
+</footer>
+
+
+</body>
+</html>
